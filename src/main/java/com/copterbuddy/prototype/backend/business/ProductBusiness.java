@@ -1,9 +1,14 @@
 package com.copterbuddy.prototype.backend.business;
 
 import com.copterbuddy.prototype.backend.exeption.BaseException;
+import com.copterbuddy.prototype.backend.exeption.FileException;
 import com.copterbuddy.prototype.backend.exeption.ProductException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Service
