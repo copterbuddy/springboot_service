@@ -1,5 +1,9 @@
 package com.copterbuddy.prototype.backend.config;
 
+import com.copterbuddy.prototype.backend.config.token.TokenFilter;
+import com.copterbuddy.prototype.backend.config.token.TokenFilterConfiguerer;
+import com.copterbuddy.prototype.backend.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +22,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         super.configure(auth);
@@ -29,6 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().disable().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().authorizeRequests().antMatchers("/user/register","/user/login").anonymous()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+                .and().apply(new TokenFilterConfiguerer(tokenService));
     }
 }

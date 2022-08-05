@@ -8,8 +8,13 @@ import com.copterbuddy.prototype.backend.mapper.UserMapper;
 import com.copterbuddy.prototype.backend.model.MLoginRequest;
 import com.copterbuddy.prototype.backend.model.MRegisterRequest;
 import com.copterbuddy.prototype.backend.model.MRegisterResponse;
+import com.copterbuddy.prototype.backend.service.TokenService;
 import com.copterbuddy.prototype.backend.service.UserService;
+import com.copterbuddy.prototype.backend.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,25 +32,43 @@ public class UserBusiness {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private TokenService tokenService;
+
     public String login(MLoginRequest request) throws UserException {
         //validate request
 
         //verify database
         Optional<User> opt = userService.findByEmail(request.getEmail());
-        if (opt.isEmpty()){
+        if (opt.isEmpty()) {
             throw UserException.loginFailEmailNotFound();
         }
 
         User user = opt.get();
-        if(!userService.matchPassword(request.getPassword(),user.getPassword())){
+        if (!userService.matchPassword(request.getPassword(), user.getPassword())) {
             // throw login fail,password incorrect
             throw UserException.loginFailPasswordIncorrect();
         }
 
-        // TODO: Generate JWT
-        String token = "JWT TO DO";
+        // * Generate JWT
+        return tokenService.tokenize(user);
+    }
 
-        return token;
+    public String refreshToken() throws BaseException {
+        Optional<String> opt = SecurityUtil.getCurrentUserId();
+        if (opt.isEmpty()){
+            throw UserException.unauthorized();
+        }
+
+        String userId = opt.get();
+
+        Optional<User> optUser = userService.findById(userId);
+        if (optUser.isEmpty()) {
+            throw UserException.notFound();
+        }
+
+        User user = optUser.get();
+        return tokenService.tokenize(user);
     }
 
     public MRegisterResponse register(MRegisterRequest request) throws BaseException {
