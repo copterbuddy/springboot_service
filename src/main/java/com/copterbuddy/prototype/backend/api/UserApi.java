@@ -3,6 +3,7 @@ package com.copterbuddy.prototype.backend.api;
 import com.copterbuddy.prototype.backend.business.UserBusiness;
 import com.copterbuddy.prototype.backend.exeption.BaseException;
 import com.copterbuddy.prototype.backend.model.MLoginRequest;
+import com.copterbuddy.prototype.backend.model.MLoginResponse;
 import com.copterbuddy.prototype.backend.model.MRegisterRequest;
 import com.copterbuddy.prototype.backend.model.MRegisterResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ public class UserApi {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody MLoginRequest request) throws BaseException {
-        String response = business.login(request);
+    public ResponseEntity<MLoginResponse> login(@RequestBody MLoginRequest request) throws BaseException {
+        MLoginResponse response = business.login(request);
         return ResponseEntity.ok(response);
     }
 

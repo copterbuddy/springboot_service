@@ -6,6 +6,7 @@ import com.copterbuddy.prototype.backend.exeption.FileException;
 import com.copterbuddy.prototype.backend.exeption.UserException;
 import com.copterbuddy.prototype.backend.mapper.UserMapper;
 import com.copterbuddy.prototype.backend.model.MLoginRequest;
+import com.copterbuddy.prototype.backend.model.MLoginResponse;
 import com.copterbuddy.prototype.backend.model.MRegisterRequest;
 import com.copterbuddy.prototype.backend.model.MRegisterResponse;
 import com.copterbuddy.prototype.backend.service.TokenService;
@@ -35,7 +36,7 @@ public class UserBusiness {
     @Autowired
     private TokenService tokenService;
 
-    public String login(MLoginRequest request) throws UserException {
+    public MLoginResponse login(MLoginRequest request) throws UserException {
         //validate request
 
         //verify database
@@ -51,7 +52,12 @@ public class UserBusiness {
         }
 
         // * Generate JWT
-        return tokenService.tokenize(user);
+        String token = tokenService.tokenize(user);
+
+        MLoginResponse response = new MLoginResponse();
+        response.setToken(token);
+
+        return response;
     }
 
     public String refreshToken() throws BaseException {

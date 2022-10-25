@@ -10,17 +10,19 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokenFilter extends GenericFilterBean {
+public class TokenFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
 
@@ -29,9 +31,23 @@ public class TokenFilter extends GenericFilterBean {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String url = request.getRequestURI();
+        if (request.getRequestURI().startsWith("/socket/info")
+                || request.getRequestURI().startsWith("/socket/info/")) {
+            return true;
+        }
 
+
+        if (request.getRequestURI().startsWith("/socket")
+                || request.getRequestURI().endsWith("/websocket")) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         String authorization = request.getHeader("Authorization");
         if (ObjectUtils.isEmpty(authorization)) {
@@ -64,7 +80,6 @@ public class TokenFilter extends GenericFilterBean {
         context.setAuthentication(authentication);
 
         filterChain.doFilter(servletRequest, servletResponse);
-
     }
 
 }
